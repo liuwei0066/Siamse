@@ -1,0 +1,11 @@
+.ipynb_checkpoints
+checkpoints/
+*.ipynb
+*.png
+.idea/
+__pycache__/
+Data/
+*.jpg
+archive/
+img/
+test_images/
