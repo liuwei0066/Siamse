@@ -16,11 +16,14 @@ comprehensive discussion about factual and counterfactual explanations provided 
 ## Contents
 
 <!--ts-->
-   * [Getting started](#getting-started)
-        * [Setting up environment](#setting-up-environment)
-        * [Upload dataset](#upload-dataset)
-        * [How to run](#how-to-run)
-   * [Contact](#mailbox-contact)
+- [Explainability on Siamese Networks](#explainability-on-siamese-networks)
+  - [Contents](#contents)
+  - [Getting started](#getting-started)
+  - [Setting up environment](#setting-up-environment)
+  - [Upload dataset](#upload-dataset)
+    - [How to run](#how-to-run)
+    - [添加测试功能](#添加测试功能)
+  - [:mailbox: Contact](#mailbox-contact)
 <!--te-->
 
 <br/>
@@ -71,6 +74,14 @@ selected and this pair is assigned with label one (1).*
 - Run notebook: `01.Train_Siamese_model.ipynb` for training a Siamese network. 
 
 - Run notebook: `02.Inferences.ipynb` for conducting a use on two images, for calculating the similarity scores as well as factual and counterfactual explanations.
+
+### 添加测试功能
+- 测试脚本new_test.py
+- 运行方法：
+```
+python new_test.py 
+```
+- 新增功能：输入一张图像和一个待匹配图像文件夹，在待匹配图像文件夹中匹配相似度最高的一张图像并且展示。
 
 <br/>
 
