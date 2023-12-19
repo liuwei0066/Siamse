@@ -22,7 +22,7 @@ comprehensive discussion about factual and counterfactual explanations provided 
   - [Setting up environment](#setting-up-environment)
   - [Upload dataset](#upload-dataset)
     - [How to run](#how-to-run)
-    - [添加测试功能](#添加测试功能)
+  - [添加测试功能](#添加测试功能)
   - [:mailbox: Contact](#mailbox-contact)
 <!--te-->
 
@@ -75,7 +75,7 @@ selected and this pair is assigned with label one (1).*
 
 - Run notebook: `02.Inferences.ipynb` for conducting a use on two images, for calculating the similarity scores as well as factual and counterfactual explanations.
 
-### 添加测试功能
+## 添加测试功能
 - 测试脚本new_test.py
 - 运行方法：
 ```
