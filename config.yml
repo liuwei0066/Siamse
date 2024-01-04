@@ -1,9 +1,10 @@
-data_path: 'archive/animals/animals'  
+data_path: '/mnt/sda1/template_match/match_data'  
 number_of_iterations: 1
+tensorboard_log_dir: 'logs_bin'
 # Model name
 backbone_model: 'MobileNet' # MobileNet, ResNet50
 pretrained: True
-checkpoints_path: 'checkpoints/Animals'
+checkpoints_path: 'checkpoints/oursdata'
 test_size: 0.1
 valid_size: 0.1
 # Image processing
@@ -22,7 +23,7 @@ image:
     hue: 0.0
 # Training model hyperparameters    
 hyperparameters:    
-    epochs: 100
+    epochs: 50
     verbose: True
     batch_size: 8
     num_workers: 2

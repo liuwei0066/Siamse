@@ -12,11 +12,15 @@ from sklearn.model_selection import train_test_split
 
 from utils.load_transformations import load_transformations
 from utils.dataset import Dataset
-from utils.utils import get_dataset, create_instances, format_time
+from utils.utils import get_dataset, create_instances, format_time,Caltech256_dataset
 from utils.Siamese import SiameseNetwork
 from utils.early_stopping import EarlyStopping
 from utils.LRScheduler import LRScheduler
 from utils.performance_evaluation import performance_evaluation
+
+from torch.utils.tensorboard import SummaryWriter
+
+
 
 
 # Get configuration
@@ -25,10 +29,13 @@ with open("config.yml", 'r') as stream:
 if params['cuda']:
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+# 创建TensorBoard的SummaryWriter
+writer = SummaryWriter(log_dir=params['tensorboard_log_dir'])
 
 
 # Retrieve dataset
-df = get_dataset(params)
+df = get_dataset(params) #使用通用数据集
+#df = Caltech256_dataset(params) #使用Caltech256数据集
 # Split to train/valid/test
 df_train, df_test = train_test_split(df, test_size=params['test_size'], random_state=params['seed'])
 df_train, df_valid = train_test_split(df_train, test_size=params['valid_size'], random_state=params['seed'])
@@ -70,6 +77,7 @@ test_dl = DataLoader(dataset = Dataset(data=test_dataset, tfms=test_tfms),
 # Setup model
 model = SiameseNetwork(backbone_model=params['backbone_model']).to(device)
 
+
 # Setup optimizer
 if params['hyperparameters']['optimizer'] == 'AdamW':
     optimizer = torch.optim.AdamW(model.parameters(), lr=float(params['hyperparameters']['learning_rate']))
@@ -92,6 +100,9 @@ best_AUC = 0.0
 history = {'train_loss': [], 'valid_loss': [],
            'train_accuracy': [], 'valid_accuracy': [],
            'train_AUC': [], 'valid_AUC': []}
+# 初始化计数器
+save_interval = 5
+epochs_since_last_save = 0
 
 for epoch in range(params['hyperparameters']['epochs']):
 
@@ -128,10 +139,16 @@ for epoch in range(params['hyperparameters']['epochs']):
                          accuracy=f"{np.mean(metrics['accuracy']):.2f}%",
                          AUC=f"{np.mean(metrics['AUC']):.3f}")
 
+        # 记录到TensorBoard
+        writer.add_scalar('Train/Loss', np.mean(metrics['losses']), global_step=epoch+1)
+        writer.add_scalar('Train/Accuracy', np.mean(metrics['accuracy']), global_step=epoch+1)
+        writer.add_scalar('Train/AUC', np.mean(metrics['AUC']), global_step=epoch+1)
+
     # Calculate test loss/accuracy/AUC
     train_loss = np.mean(metrics['losses'])
     train_accuracy = np.mean(metrics['accuracy'])
     train_AUC = np.mean(metrics['AUC'])
+
 
     model.eval()
     ConfusionMatrix = np.array([[0, 0], [0, 0]])  # LIVIERIS
@@ -156,6 +173,13 @@ for epoch in range(params['hyperparameters']['epochs']):
         loop.set_postfix(loss=f"{np.mean(metrics['losses']):.3f}",
                          accuracy=f"{np.mean(metrics['accuracy']):.2f}%",
                          AUC=f"{np.mean(metrics['AUC']):.3f}")
+
+        # 记录到TensorBoard
+        writer.add_scalar('Validation/Loss', np.mean(metrics['losses']), global_step=epoch+1)
+        writer.add_scalar('Validation/Accuracy', np.mean(metrics['accuracy']), global_step=epoch+1)
+        writer.add_scalar('Validation/AUC', np.mean(metrics['AUC']), global_step=epoch+1)
+
+
     print(ConfusionMatrix)  # LIVIERIS
     # Calculate test loss/MSE
     valid_loss = np.mean(metrics['losses'])
@@ -184,8 +208,17 @@ for epoch in range(params['hyperparameters']['epochs']):
         # Learning rate scheduler
     scheduler(valid_AUC)
 
+    # 每经过save_interval个epoch，保存一次模型
+    epochs_since_last_save += 1
+    if epochs_since_last_save >= save_interval:
+        print(f'[INFO] Saving model after {epoch + 1} epochs')
+        torch.save(model, os.path.join(params['checkpoints_path'], f"model_epoch_{epoch + 1}.pth"))
+        epochs_since_last_save = 0
+
     # Early Stopping
     #if early_stopping(valid_AUC): break
+# 训练结束后关闭TensorBoard的SummaryWriter
+writer.close()
 
 
 

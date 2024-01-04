@@ -9,3 +9,5 @@ Data/
 archive/
 img/
 test_images/
+logs/
+logs_bin/

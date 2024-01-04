@@ -39,6 +39,41 @@ def get_dataset(params:dict=None)->pd.DataFrame:
     return df
 
 
+def Caltech256_dataset(params:dict=None)->pd.DataFrame:
+    '''
+        Import data
+
+        Parameters
+        ----------
+        params: dict
+            dictionary with parameters i.e paths, ...
+
+        Returns
+        -------
+        DataFrame containing the files with the corresponding class
+    '''
+
+
+    # Get directory names ie classes
+    directories_list_all = [f for f in os.listdir(params['data_path']) if os.path.isdir(os.path.join(params['data_path'], f))]
+    directories_list = directories_list_all[:20]
+    # Parse all directory and get the contained files
+    files, labels = [], []
+    for directory in directories_list:
+        # Get files
+        path = os.path.join(params['data_path'], directory)
+        files_list = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))] 
+
+        files += [os.path.join(path, file) for file in files_list]
+        labels += [ directory ] * len(files_list)
+
+    # Store information in DataFrame
+    df = pd.DataFrame({})
+    df['Files'] = files
+    df['Labels'] = labels
+
+    return df
+
 def create_instances(df:pd.DataFrame=None, number_of_iterations:int=None)->list:
     '''
         Training instances (positive, negative) for training and evaluating
